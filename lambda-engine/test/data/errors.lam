@@ -1,0 +1,104 @@
+-- Definition-level problems and chain option errors; statuses and
+-- messages are asserted in Test.hs.
+language pure
+import prelude
+vars x y z
+
+task 2.1 (повторное определение)
+dup := \x. x
+dup := \x. x
+expect dup x = x
+
+task 2.2 (ссылка на себя)
+loop := loop x
+expect loop = x
+
+task 2.3 (не определено)
+bad := \x. missing x
+expect bad x = x
+
+task 2.4 (подстановка вне цепочки)
+sub := ([x |-> S] x)
+expect sub = S
+
+task 2.5 (~s~> не после подстановки)
+chain s2 =
+  K x y
+  ~s~> x
+
+task 2.6 (~~> со стратегией)
+chain m1 (strategy normal) =
+  (\x. y) ((\z. z) I)
+  ~~> y
+
+task 2.7 (from не совпадает)
+chain f1 from (K x y) =
+  K x z
+  ~K~> (\x y. x) x z
+  ~b~> (\y. x) z
+  ~b~> x
+
+task 2.8 (to не совпадает)
+chain t1 to I =
+  K x
+  ~K~> (\x y. x) x
+  ~b~> \y. x
+
+task 2.9 (цепочка не закончена)
+chain u1 =
+  K x y
+  ~K~> (\x y. x) x y
+
+task 2.10 (не тот шаг стратегии)
+chain st (strategy applicative) =
+  (\x. y) ((\z. z) I)
+  ~b~> y
+
+task 2.11 (нет редексов)
+chain nr (strategy normal) =
+  x
+  ~b~> x
+
+task 2.12 (не α-шаг)
+chain al =
+  \x. x
+  =a= \y. x
+
+task 2.13 (~~> за один шаг)
+chain far (steps 1) =
+  K x (I y)
+  ~~> x
+
+task 2.14 (расходящийся expect)
+expect omega = x
+
+task 2.15 (free неверно)
+fr := \x. x y
+free fr = x
+
+task 2.16 (rename)
+rn := \x. \x. x
+rename rn = \x. \x. x
+rename rn = \a. \b. a
+
+task 2.17 (minimal)
+mn := \x. x (y x)
+minimal mn = \z. z (y z)
+minimal mn = \x. y x
+
+task 2.18 (предикаты)
+cp := \x. (\y. y) x
+check cp: closed, nf, not whnf, uses K, hnf
+co := \x. x y
+check co: closed, avoids I
+check cp: not closed
+
+task 2.19 (дырка в цепочке)
+chain hc =
+  K x y
+  ~K~> ...
+
+task 2.20 (неизвестное имя в expect)
+expect nope x = x
+
+task 2.21 (пустая секция)
